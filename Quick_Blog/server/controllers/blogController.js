@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import imagekit from "../configs/imageKit.js";
 import Blog from "../models/Blog.js";
 import Comment from "../models/Comment.js";
+import Newsletter from "../models/Newsletter.js";
 import main from '../configs/gemini.js'
 //ADD BLOG
 export const addBlog = async (req, res) => {
@@ -125,6 +126,19 @@ export const generateContent = async (req, res) => {
     // to generate content based on the prompt.
     const content = await main(prompt + ' Generate a blog content for this topic in simple text format');
     res.json({ success: true, content });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const subscribeNewsletter = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.json({ success: false, message: "Email is required" });
+    const existing = await Newsletter.findOne({ email });
+    if (existing) return res.json({ success: false, message: "Email already subscribed" });
+    await Newsletter.create({ email });
+    res.json({ success: true, message: "Subscribed successfully!" });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
